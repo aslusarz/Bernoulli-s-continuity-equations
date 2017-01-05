@@ -1,26 +1,45 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#@author: aslusarz
 
 # FROM ZERO TO PYTHON HERO series
-# Script No#2: Bernoulli's and one-dimensional continuity equations for fluent flow excluding height of flow channel
+# Script No#2:  Bernoulli's and one-dimensional continuity equations for fluent flow excluding height of flow channel
+#               Rev -A: added calculating of dry air density
+#                       directed for air flow computation
 # File created: 03.01.17
-# File modified: 00.00.00
-# Version: P.2.001-0 [P:Prototype, F:Final]
+# Last modified: 05.01.17
+# Version: P.2.001-A [P:Prototype, F:Final]
 
 #   input method: [velocity_1, pressure_1, velocity_2, pressure_2, density]
 #   one of them must be replaced by question mark, e.g: [velocity_1, ?, velocity_2, pressure_2, density]
 #   all: velocity, pressure (gauge pressure!) and density values given adequately in: [m/s], [Pa], [kg/m^3]
 
+#   input metod for air parameters: [Celsius degree, gauge pressure]
+#   all converted to absolute unit, returned dry air density in [kg/m^3]
+
 
 import math
 
 QM = chr(63) #ASCII question mark
+
+air_parameters = [22, 500000]
+data = [10, 300, QM, 100, 1.113]
+
 VELOCITY = '[m/s]'
 PRESSURE = '[Pa]'
 DENSITY = '[kg/m^3]'
+TEMP = '[K]'
 REFERENCE_PRESSURE = 101325
+IGC = 286.9
 
-data = [10, 300, QM, 100, 1.113]
+def return_kelvin_temp(temp):
+    return round(273.15 + temp, 2)
+
+def compute_air_density(temp, pressure):
+    kelvin_temp = return_kelvin_temp(temp)
+    abs_pressure = pressure + REFERENCE_PRESSURE
+    density = abs_pressure / (kelvin_temp * IGC)
+    return round(density, 3)
 
 def check_marked_pos(param_list):
     check = [False, 0]
@@ -48,7 +67,7 @@ def calculate_parameter(searched):
         res = str(round(res, 2)) + DENSITY
     return res
 
-def main(values):
+def main(values, air_values):
     mark_pos = check_marked_pos(values)
     if mark_pos[0]:
         result = calculate_parameter(mark_pos[1])
@@ -61,9 +80,12 @@ def main(values):
         print (' Other parameters:')
         print ('Fluent density: {0} {1}'.format(data[4], DENSITY))
         print ('Reference pressure: {0} {1}'.format(REFERENCE_PRESSURE, PRESSURE))
-        print ('#RESULT:')
-        print ('# = {}'.format(result))
+        print ('RESULT: ? = {0}'.format(result))
+        print ('=========================================')
+        print ('Air temperature: {0} {1}'.format(return_kelvin_temp(air_values[0]), TEMP))
+        print ('Air absolute pressure: {0} {1}'.format(air_values[1] + REFERENCE_PRESSURE, PRESSURE))
+        print ('Density: {0} {1}'.format(compute_air_density(air_values[0], air_values[1]), DENSITY))
     else:
         print ('Wrong amount of parameters or no question mark!')
 
-main(data)
+main(data, air_parameters)
